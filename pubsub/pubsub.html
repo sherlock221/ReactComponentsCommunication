@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>发布/订阅模式</title>
+    <script type="text/javascript" src="../lib/react.js"></script>
+    <script type="text/javascript" src="../lib/JSXTransformer.js"></script>
+    <script type="text/javascript" src="pubsub.js"></script>
+</head>
+<body>
+
+
+    <div id="container"></div>
+
+
+</body>
+
+
+<script type="text/jsx">
+
+    var UserComponent = React.createClass({
+
+
+        pubsub_token : "",
+
+        getInitialState : function(){
+            return {
+                msg : "等待收到消息"
+            }
+        },
+
+        _receiveMessage : function(msg, data ){
+            this.setState({
+                msg : data
+            })
+        },
+
+        componentDidMount : function(){
+
+            //订阅了消息通知
+            this.pubsub_token = PubSub.subscribe('message', this._receiveMessage)
+        },
+
+
+        //别忘了记得在卸载组件的时候 取消订阅通知
+        componentWillUnmount : function(){
+
+            //取消订阅
+            PubSub.unsubscribe(this.pubsub_token);
+        },
+
+        render : function(){
+            return(
+                    <div>{this.props.userName}:{this.state.msg}</div>
+            );
+        }
+
+    });
+
+    var sendMsg = function(e){
+
+        //发送消息通知
+        PubSub.publish("message","你好");
+    }
+
+    React.render(
+            <div>
+                <UserComponent userName="小明"/>
+                <UserComponent userName="小红"/>
+                <input type="button" onClick={sendMsg} value="发送消息通知"/>
+            </div>,
+            document.getElementById('container')
+    );
+
+
+</script>
+
+
+</html>
